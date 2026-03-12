@@ -44,35 +44,6 @@
     @keyframes orbMove2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-50px,-30px)} }
     @keyframes orbMove3 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-30px,50px)} }
 
-    /* ── Scrolling ticker bar ── */
-    .ticker-bar {
-      position: relative;
-      z-index: 2;
-      overflow: hidden;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      background: rgba(6, 9, 16, 0.8);
-      backdrop-filter: blur(10px);
-      padding: 10px 0;
-    }
-    .ticker-track {
-      display: flex;
-      gap: 3rem;
-      animation: scroll 30s linear infinite;
-      width: max-content;
-    }
-    .ticker-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      color: #52525b;
-      white-space: nowrap;
-    }
-    .ticker-item .symbol { color: #a1a1aa; font-weight: 500; }
-    .ticker-item .up { color: #00e5a0; }
-    .ticker-item .down { color: #ff4d6a; }
-    @keyframes scroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
 
     /* ── Main layout ── */
     .page {
@@ -414,10 +385,6 @@
   <div class="orb orb-2"></div>
   <div class="orb orb-3"></div>
 
-  <!-- Scrolling ticker bar -->
-  <div class="ticker-bar">
-    <div class="ticker-track" id="tickerTrack"></div>
-  </div>
 
   <div class="page">
     <!-- Logo -->
@@ -547,24 +514,6 @@
     }
     drawGrid();
 
-    // ── Ticker bar ──
-    const tickers = [
-      { s: 'AAPL', p: '198.52', c: '+1.24%', up: true },
-      { s: 'TSLA', p: '241.80', c: '-0.87%', up: false },
-      { s: 'NVDA', p: '892.44', c: '+2.31%', up: true },
-      { s: 'MSFT', p: '421.90', c: '+0.65%', up: true },
-      { s: 'AMZN', p: '187.32', c: '-0.42%', up: false },
-      { s: 'GOOG', p: '155.18', c: '+1.08%', up: true },
-      { s: 'META', p: '502.60', c: '+0.93%', up: true },
-      { s: 'AMD', p: '178.25', c: '-1.15%', up: false },
-      { s: 'JPM', p: '198.44', c: '+0.72%', up: true },
-      { s: 'BRK.B', p: '412.30', c: '+0.18%', up: true },
-    ];
-    const track = document.getElementById('tickerTrack');
-    const items = tickers.map(t =>
-      `<div class="ticker-item"><span class="symbol">${t.s}</span> $${t.p} <span class="${t.up ? 'up' : 'down'}">${t.c}</span></div>`
-    ).join('');
-    track.innerHTML = items + items; // duplicate for seamless scroll
 
     // ── Typing effect ──
     const lines = [
