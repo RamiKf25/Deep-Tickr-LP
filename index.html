@@ -6,275 +6,420 @@
   <title>DeepTickr — AI-Powered Stock Intelligence</title>
   <meta name="description" content="DeepTickr is building the future of stock analysis. AI-powered insights from 10+ data sources.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       min-height: 100vh;
-      background: #080b10;
+      background: #060910;
       color: #fff;
       font-family: 'Inter', -apple-system, sans-serif;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ── Canvas background ── */
+    #gridCanvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ── Gradient orbs ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 { width: 500px; height: 500px; background: rgba(0, 229, 160, 0.12); top: -150px; left: -100px; animation: orbMove1 12s ease-in-out infinite; }
+    .orb-2 { width: 450px; height: 450px; background: rgba(0, 180, 216, 0.10); bottom: -100px; right: -80px; animation: orbMove2 14s ease-in-out infinite; }
+    .orb-3 { width: 300px; height: 300px; background: rgba(167, 139, 250, 0.08); top: 40%; left: 60%; animation: orbMove3 10s ease-in-out infinite; }
+
+    @keyframes orbMove1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(60px,40px)} }
+    @keyframes orbMove2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-50px,-30px)} }
+    @keyframes orbMove3 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-30px,50px)} }
+
+    /* ── Scrolling ticker bar ── */
+    .ticker-bar {
+      position: relative;
+      z-index: 2;
+      overflow: hidden;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      background: rgba(6, 9, 16, 0.8);
+      backdrop-filter: blur(10px);
+      padding: 10px 0;
+    }
+    .ticker-track {
+      display: flex;
+      gap: 3rem;
+      animation: scroll 30s linear infinite;
+      width: max-content;
+    }
+    .ticker-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: #52525b;
+      white-space: nowrap;
+    }
+    .ticker-item .symbol { color: #a1a1aa; font-weight: 500; }
+    .ticker-item .up { color: #00e5a0; }
+    .ticker-item .down { color: #ff4d6a; }
+    @keyframes scroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+    /* ── Main layout ── */
+    .page {
+      position: relative;
+      z-index: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
+      min-height: calc(100vh - 40px);
       justify-content: center;
-      overflow: hidden;
-      position: relative;
+      padding: 3rem 1.5rem;
     }
 
-    /* Animated gradient background */
-    .bg-glow {
-      position: absolute;
-      width: 600px;
-      height: 600px;
-      border-radius: 50%;
-      filter: blur(120px);
-      opacity: 0.15;
-      animation: float 8s ease-in-out infinite;
-    }
-
-    .bg-glow-1 {
-      background: #00e5a0;
-      top: -200px;
-      left: -100px;
-      animation-delay: 0s;
-    }
-
-    .bg-glow-2 {
-      background: #00b4d8;
-      bottom: -200px;
-      right: -100px;
-      animation-delay: -4s;
-    }
-
-    .bg-glow-3 {
-      background: #a78bfa;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 400px;
-      height: 400px;
-      opacity: 0.08;
-      animation-delay: -2s;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      33% { transform: translate(30px, -20px) scale(1.05); }
-      66% { transform: translate(-20px, 20px) scale(0.95); }
-    }
-
-    .content {
-      position: relative;
-      z-index: 1;
-      text-align: center;
-      padding: 2rem;
-      max-width: 560px;
-    }
-
-    /* Logo */
+    /* ── Logo ── */
     .logo {
       display: inline-flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
       margin-bottom: 3rem;
+      animation: fadeUp 0.8s ease-out both;
     }
-
     .logo-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      background: rgba(0, 229, 160, 0.1);
-      border: 1px solid rgba(0, 229, 160, 0.25);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 52px; height: 52px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(0,229,160,0.15), rgba(0,180,216,0.1));
+      border: 1px solid rgba(0,229,160,0.25);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      overflow: hidden;
     }
-
+    .logo-icon::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 40%, rgba(0,229,160,0.15));
+      animation: shimmer-icon 3s ease-in-out infinite;
+    }
+    @keyframes shimmer-icon {
+      0%,100%{opacity:0} 50%{opacity:1}
+    }
     .logo-icon span {
       color: #00e5a0;
       font-family: 'Syne', sans-serif;
       font-weight: 800;
-      font-size: 20px;
+      font-size: 22px;
+      position: relative;
+      z-index: 1;
     }
-
     .logo-text {
       font-family: 'Syne', sans-serif;
       font-weight: 800;
-      font-size: 28px;
+      font-size: 30px;
       letter-spacing: -0.5px;
     }
+    .logo-text .accent { color: #00e5a0; }
 
-    .logo-text .accent {
-      color: #00e5a0;
-    }
-
-    /* Badge */
+    /* ── Badge ── */
     .badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 16px;
+      padding: 7px 18px;
       border-radius: 100px;
-      background: rgba(0, 229, 160, 0.08);
-      border: 1px solid rgba(0, 229, 160, 0.2);
-      font-size: 12px;
+      background: rgba(0,229,160,0.06);
+      border: 1px solid rgba(0,229,160,0.15);
+      font-size: 11px;
       font-weight: 600;
       color: #00e5a0;
       text-transform: uppercase;
-      letter-spacing: 1.5px;
-      margin-bottom: 2rem;
+      letter-spacing: 2px;
+      margin-bottom: 2.5rem;
+      animation: fadeUp 0.8s 0.1s ease-out both;
     }
-
     .badge-dot {
-      width: 6px;
-      height: 6px;
+      width: 6px; height: 6px;
       border-radius: 50%;
       background: #00e5a0;
       animation: pulse-dot 2s ease-in-out infinite;
+      box-shadow: 0 0 8px rgba(0,229,160,0.5);
     }
+    @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
 
-    @keyframes pulse-dot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.8); }
-    }
-
-    h1 {
+    /* ── Headline ── */
+    .headline {
       font-family: 'Syne', sans-serif;
-      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-size: clamp(2.8rem, 7vw, 4.5rem);
       font-weight: 800;
-      line-height: 1.1;
-      margin-bottom: 1.25rem;
-      letter-spacing: -1px;
+      line-height: 1.08;
+      margin-bottom: 1.5rem;
+      letter-spacing: -1.5px;
+      text-align: center;
+      animation: fadeUp 0.8s 0.2s ease-out both;
+    }
+    .headline .gradient {
+      background: linear-gradient(135deg, #00e5a0 0%, #00b4d8 50%, #a78bfa 100%);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientShift 6s ease-in-out infinite;
+    }
+    @keyframes gradientShift {
+      0%,100%{background-position:0% 50%} 50%{background-position:100% 50%}
     }
 
-    h1 .gradient {
+    /* ── AI terminal block ── */
+    .ai-terminal {
+      max-width: 480px;
+      width: 100%;
+      margin: 0 auto 2.5rem;
+      background: rgba(12, 15, 22, 0.8);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 20px 24px;
+      text-align: left;
+      backdrop-filter: blur(20px);
+      animation: fadeUp 0.8s 0.3s ease-out both;
+    }
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .terminal-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .terminal-dot.r { background: #ff5f57; }
+    .terminal-dot.y { background: #ffbd2e; }
+    .terminal-dot.g { background: #28c840; }
+    .terminal-label {
+      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: #3f3f46;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .terminal-line {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      line-height: 1.8;
+      color: #52525b;
+    }
+    .terminal-line .prompt { color: #00e5a0; }
+    .terminal-line .cmd { color: #a1a1aa; }
+    .terminal-line .highlight { color: #00b4d8; }
+    .terminal-line .purple { color: #a78bfa; }
+    #typedText { color: #e4e4e7; }
+    .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 14px;
+      background: #00e5a0;
+      margin-left: 2px;
+      vertical-align: middle;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* ── Subtitle ── */
+    .subtitle {
+      font-size: 15px;
+      color: #71717a;
+      line-height: 1.8;
+      max-width: 420px;
+      margin: 0 auto 2.5rem;
+      text-align: center;
+      animation: fadeUp 0.8s 0.4s ease-out both;
+    }
+
+    /* ── Email form ── */
+    .notify-form {
+      display: flex;
+      gap: 8px;
+      max-width: 420px;
+      width: 100%;
+      margin: 0 auto 1rem;
+      animation: fadeUp 0.8s 0.5s ease-out both;
+    }
+    .notify-form input {
+      flex: 1;
+      height: 50px;
+      padding: 0 18px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(15, 18, 25, 0.8);
+      backdrop-filter: blur(10px);
+      color: #fff;
+      font-size: 13.5px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: all 0.3s;
+    }
+    .notify-form input::placeholder { color: #3f3f46; }
+    .notify-form input:focus {
+      border-color: rgba(0,229,160,0.4);
+      box-shadow: 0 0 0 3px rgba(0,229,160,0.08);
+    }
+    .notify-form button {
+      height: 50px;
+      padding: 0 28px;
+      border-radius: 14px;
+      border: none;
+      background: linear-gradient(135deg, #00e5a0, #00c98b);
+      color: #060910;
+      font-size: 13.5px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s;
+      white-space: nowrap;
+      position: relative;
+      overflow: hidden;
+    }
+    .notify-form button::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%);
+      transform: translateX(-100%);
+      transition: transform 0.5s;
+    }
+    .notify-form button:hover::after { transform: translateX(100%); }
+    .notify-form button:hover { box-shadow: 0 0 20px rgba(0,229,160,0.3); transform: translateY(-1px); }
+
+    .hint {
+      font-size: 11px;
+      color: #27272a;
+      text-align: center;
+      animation: fadeUp 0.8s 0.55s ease-out both;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      width: 50px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,229,160,0.3), transparent);
+      margin: 2.5rem auto;
+      animation: fadeUp 0.8s 0.6s ease-out both;
+    }
+
+    /* ── Feature cards ── */
+    .features {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      max-width: 600px;
+      animation: fadeUp 0.8s 0.65s ease-out both;
+    }
+    .feature-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 18px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      font-size: 12px;
+      color: #71717a;
+      transition: all 0.3s;
+    }
+    .feature-card:hover {
+      border-color: rgba(0,229,160,0.2);
+      background: rgba(0,229,160,0.04);
+      color: #a1a1aa;
+      transform: translateY(-2px);
+    }
+    .feature-icon {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+    }
+    .fi-ai { background: rgba(0,229,160,0.1); }
+    .fi-rt { background: rgba(0,180,216,0.1); }
+    .fi-ds { background: rgba(167,139,250,0.1); }
+
+    /* ── Stats row ── */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      margin-top: 2.5rem;
+      animation: fadeUp 0.8s 0.75s ease-out both;
+    }
+    .stat {
+      text-align: center;
+    }
+    .stat-value {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 24px;
       background: linear-gradient(135deg, #00e5a0, #00b4d8);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-
-    .subtitle {
-      font-size: 16px;
-      color: #71717a;
-      line-height: 1.7;
-      margin-bottom: 2.5rem;
-    }
-
-    /* Email form */
-    .notify-form {
-      display: flex;
-      gap: 8px;
-      max-width: 400px;
-      margin: 0 auto 1.5rem;
-    }
-
-    .notify-form input {
-      flex: 1;
-      height: 48px;
-      padding: 0 16px;
-      border-radius: 12px;
-      border: 1px solid rgba(113, 113, 122, 0.3);
-      background: rgba(24, 24, 27, 0.6);
-      color: #fff;
-      font-size: 14px;
-      font-family: 'Inter', sans-serif;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .notify-form input::placeholder {
-      color: #52525b;
-    }
-
-    .notify-form input:focus {
-      border-color: rgba(0, 229, 160, 0.5);
-    }
-
-    .notify-form button {
-      height: 48px;
-      padding: 0 24px;
-      border-radius: 12px;
-      border: none;
-      background: #00e5a0;
-      color: #080b10;
-      font-size: 14px;
-      font-weight: 600;
-      font-family: 'Inter', sans-serif;
-      cursor: pointer;
-      transition: background 0.2s;
-      white-space: nowrap;
-    }
-
-    .notify-form button:hover {
-      background: #00c98b;
-    }
-
-    .hint {
-      font-size: 12px;
+    .stat-label {
+      font-size: 10px;
       color: #3f3f46;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-top: 4px;
     }
 
-    /* Divider line */
-    .divider {
-      width: 40px;
-      height: 1px;
-      background: rgba(113, 113, 122, 0.3);
-      margin: 2.5rem auto;
-    }
-
-    /* Features row */
-    .features {
-      display: flex;
-      justify-content: center;
-      gap: 2rem;
-      flex-wrap: wrap;
-    }
-
-    .feature {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      color: #52525b;
-    }
-
-    .feature-dot {
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: #00e5a0;
-      opacity: 0.6;
-    }
-
-    /* Footer */
+    /* ── Footer ── */
     .footer {
-      position: absolute;
-      bottom: 2rem;
-      font-size: 11px;
-      color: #27272a;
+      position: relative;
       z-index: 1;
+      text-align: center;
+      padding: 2rem;
+      font-size: 11px;
+      color: #1a1a1f;
+      border-top: 1px solid rgba(255,255,255,0.03);
     }
 
-    @media (max-width: 480px) {
-      .notify-form {
-        flex-direction: column;
-      }
-      .features {
-        gap: 1rem;
-      }
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 540px) {
+      .notify-form { flex-direction: column; }
+      .features { gap: 0.5rem; }
+      .stats { gap: 1.5rem; }
+      .ai-terminal { margin-left: 0.5rem; margin-right: 0.5rem; }
     }
   </style>
 </head>
 <body>
-  <!-- Background glows -->
-  <div class="bg-glow bg-glow-1"></div>
-  <div class="bg-glow bg-glow-2"></div>
-  <div class="bg-glow bg-glow-3"></div>
 
-  <div class="content">
+  <!-- Animated dot grid -->
+  <canvas id="gridCanvas"></canvas>
+
+  <!-- Gradient orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- Scrolling ticker bar -->
+  <div class="ticker-bar">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+
+  <div class="page">
     <!-- Logo -->
     <div class="logo">
       <div class="logo-icon"><span>D</span></div>
@@ -288,48 +433,181 @@
     </div>
 
     <!-- Headline -->
-    <h1>Stock analysis,<br><span class="gradient">reimagined by AI.</span></h1>
+    <h1 class="headline">The AI that reads<br><span class="gradient">the entire market.</span></h1>
+
+    <!-- AI Terminal -->
+    <div class="ai-terminal">
+      <div class="terminal-header">
+        <div class="terminal-dot r"></div>
+        <div class="terminal-dot y"></div>
+        <div class="terminal-dot g"></div>
+        <span class="terminal-label">DeepTickr AI</span>
+      </div>
+      <div class="terminal-line">
+        <span class="prompt">$</span> <span class="cmd">deeptickr analyze</span> <span class="highlight">--deep</span>
+      </div>
+      <div class="terminal-line" style="margin-top:8px;">
+        <span class="purple">&#9656;</span> <span id="typedText"></span><span class="cursor"></span>
+      </div>
+    </div>
 
     <!-- Subtitle -->
     <p class="subtitle">
-      We're building something new. AI that reads the entire market
-      so you don't have to.
+      We're training AI to process fundamentals, technicals, sentiment, and macro signals — so you get verdicts, not noise.
     </p>
 
     <!-- Notify form -->
     <form class="notify-form" onsubmit="handleSubmit(event)">
-      <input type="email" placeholder="Enter your email" required id="emailInput">
-      <button type="submit">Notify Me</button>
+      <input type="email" placeholder="your@email.com" required id="emailInput">
+      <button type="submit">Get Early Access</button>
     </form>
-    <p class="hint">Be the first to know when we launch.</p>
+    <p class="hint">Join the waitlist. No spam, ever.</p>
 
     <!-- Divider -->
     <div class="divider"></div>
 
-    <!-- Features -->
+    <!-- Feature cards -->
     <div class="features">
-      <div class="feature"><div class="feature-dot"></div>AI-Powered Verdicts</div>
-      <div class="feature"><div class="feature-dot"></div>Real-Time Signals</div>
-      <div class="feature"><div class="feature-dot"></div>10+ Data Sources</div>
+      <div class="feature-card">
+        <div class="feature-icon fi-ai">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00e5a0" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M16 14H8a4 4 0 0 0-4 4v2h16v-2a4 4 0 0 0-4-4z"/></svg>
+        </div>
+        AI Verdicts
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-rt">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00b4d8" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        Live Signals
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-ds">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </div>
+        Multi-Source
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value">10+</div>
+        <div class="stat-label">Data Sources</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">&lt;30s</div>
+        <div class="stat-label">Analysis Time</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">24/7</div>
+        <div class="stat-label">Market Watch</div>
+      </div>
     </div>
   </div>
 
   <div class="footer">&copy; 2026 DeepTickr. All rights reserved.</div>
 
   <script>
+    // ── Dot grid canvas ──
+    const canvas = document.getElementById('gridCanvas');
+    const ctx = canvas.getContext('2d');
+    let mouse = { x: -1000, y: -1000 };
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+    document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+
+    function drawGrid() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const gap = 40;
+      const maxDist = 120;
+      for (let x = gap; x < canvas.width; x += gap) {
+        for (let y = gap; y < canvas.height; y += gap) {
+          const dx = mouse.x - x;
+          const dy = mouse.y - y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const influence = Math.max(0, 1 - dist / maxDist);
+          const size = 1 + influence * 2.5;
+          const alpha = 0.12 + influence * 0.5;
+          const g = Math.round(229 * influence);
+          const r = Math.round(180 * (1 - influence) * influence);
+          ctx.beginPath();
+          ctx.arc(x, y, size, 0, Math.PI * 2);
+          ctx.fillStyle = influence > 0
+            ? `rgba(${r}, ${Math.max(g, 100)}, ${Math.round(160 + 60 * influence)}, ${alpha})`
+            : `rgba(255, 255, 255, 0.08)`;
+          ctx.fill();
+        }
+      }
+      requestAnimationFrame(drawGrid);
+    }
+    drawGrid();
+
+    // ── Ticker bar ──
+    const tickers = [
+      { s: 'AAPL', p: '198.52', c: '+1.24%', up: true },
+      { s: 'TSLA', p: '241.80', c: '-0.87%', up: false },
+      { s: 'NVDA', p: '892.44', c: '+2.31%', up: true },
+      { s: 'MSFT', p: '421.90', c: '+0.65%', up: true },
+      { s: 'AMZN', p: '187.32', c: '-0.42%', up: false },
+      { s: 'GOOG', p: '155.18', c: '+1.08%', up: true },
+      { s: 'META', p: '502.60', c: '+0.93%', up: true },
+      { s: 'AMD', p: '178.25', c: '-1.15%', up: false },
+      { s: 'JPM', p: '198.44', c: '+0.72%', up: true },
+      { s: 'BRK.B', p: '412.30', c: '+0.18%', up: true },
+    ];
+    const track = document.getElementById('tickerTrack');
+    const items = tickers.map(t =>
+      `<div class="ticker-item"><span class="symbol">${t.s}</span> $${t.p} <span class="${t.up ? 'up' : 'down'}">${t.c}</span></div>`
+    ).join('');
+    track.innerHTML = items + items; // duplicate for seamless scroll
+
+    // ── Typing effect ──
+    const lines = [
+      'Scanning 10+ data sources...',
+      'Processing technical indicators...',
+      'Analyzing social sentiment...',
+      'Reading SEC filings...',
+      'Generating AI verdict: BULLISH',
+      'Confidence: 87% — 14 signals aligned.',
+    ];
+    const typedEl = document.getElementById('typedText');
+    let lineIdx = 0, charIdx = 0;
+
+    function typeLoop() {
+      if (charIdx <= lines[lineIdx].length) {
+        typedEl.textContent = lines[lineIdx].slice(0, charIdx);
+        charIdx++;
+        setTimeout(typeLoop, 30 + Math.random() * 30);
+      } else {
+        setTimeout(() => {
+          charIdx = 0;
+          lineIdx = (lineIdx + 1) % lines.length;
+          typedEl.textContent = '';
+          setTimeout(typeLoop, 400);
+        }, 2000);
+      }
+    }
+    typeLoop();
+
+    // ── Form submit ──
     function handleSubmit(e) {
       e.preventDefault();
       const input = document.getElementById('emailInput');
       const btn = e.target.querySelector('button');
-      btn.textContent = 'Added!';
-      btn.style.background = '#065f46';
+      btn.textContent = 'You\'re in!';
+      btn.style.background = 'linear-gradient(135deg, #065f46, #064e3b)';
       btn.style.color = '#00e5a0';
       input.value = '';
       setTimeout(() => {
-        btn.textContent = 'Notify Me';
-        btn.style.background = '#00e5a0';
-        btn.style.color = '#080b10';
-      }, 2500);
+        btn.textContent = 'Get Early Access';
+        btn.style.background = 'linear-gradient(135deg, #00e5a0, #00c98b)';
+        btn.style.color = '#060910';
+      }, 3000);
     }
   </script>
 </body>
