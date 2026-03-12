@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeepTickr — AI-Powered Stock Intelligence</title>
+  <meta name="description" content="DeepTickr is building the future of stock analysis. AI-powered insights from 10+ data sources.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      background: #080b10;
+      color: #fff;
+      font-family: 'Inter', -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Animated gradient background */
+    .bg-glow {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.15;
+      animation: float 8s ease-in-out infinite;
+    }
+
+    .bg-glow-1 {
+      background: #00e5a0;
+      top: -200px;
+      left: -100px;
+      animation-delay: 0s;
+    }
+
+    .bg-glow-2 {
+      background: #00b4d8;
+      bottom: -200px;
+      right: -100px;
+      animation-delay: -4s;
+    }
+
+    .bg-glow-3 {
+      background: #a78bfa;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      height: 400px;
+      opacity: 0.08;
+      animation-delay: -2s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -20px) scale(1.05); }
+      66% { transform: translate(-20px, 20px) scale(0.95); }
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2rem;
+      max-width: 560px;
+    }
+
+    /* Logo */
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 3rem;
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: rgba(0, 229, 160, 0.1);
+      border: 1px solid rgba(0, 229, 160, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-icon span {
+      color: #00e5a0;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+    }
+
+    .logo-text {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 28px;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-text .accent {
+      color: #00e5a0;
+    }
+
+    /* Badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 100px;
+      background: rgba(0, 229, 160, 0.08);
+      border: 1px solid rgba(0, 229, 160, 0.2);
+      font-size: 12px;
+      font-weight: 600;
+      color: #00e5a0;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 2rem;
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #00e5a0;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1.25rem;
+      letter-spacing: -1px;
+    }
+
+    h1 .gradient {
+      background: linear-gradient(135deg, #00e5a0, #00b4d8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: #71717a;
+      line-height: 1.7;
+      margin-bottom: 2.5rem;
+    }
+
+    /* Email form */
+    .notify-form {
+      display: flex;
+      gap: 8px;
+      max-width: 400px;
+      margin: 0 auto 1.5rem;
+    }
+
+    .notify-form input {
+      flex: 1;
+      height: 48px;
+      padding: 0 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(113, 113, 122, 0.3);
+      background: rgba(24, 24, 27, 0.6);
+      color: #fff;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .notify-form input::placeholder {
+      color: #52525b;
+    }
+
+    .notify-form input:focus {
+      border-color: rgba(0, 229, 160, 0.5);
+    }
+
+    .notify-form button {
+      height: 48px;
+      padding: 0 24px;
+      border-radius: 12px;
+      border: none;
+      background: #00e5a0;
+      color: #080b10;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .notify-form button:hover {
+      background: #00c98b;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #3f3f46;
+    }
+
+    /* Divider line */
+    .divider {
+      width: 40px;
+      height: 1px;
+      background: rgba(113, 113, 122, 0.3);
+      margin: 2.5rem auto;
+    }
+
+    /* Features row */
+    .features {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .feature {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #52525b;
+    }
+
+    .feature-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #00e5a0;
+      opacity: 0.6;
+    }
+
+    /* Footer */
+    .footer {
+      position: absolute;
+      bottom: 2rem;
+      font-size: 11px;
+      color: #27272a;
+      z-index: 1;
+    }
+
+    @media (max-width: 480px) {
+      .notify-form {
+        flex-direction: column;
+      }
+      .features {
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background glows -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+  <div class="bg-glow bg-glow-3"></div>
+
+  <div class="content">
+    <!-- Logo -->
+    <div class="logo">
+      <div class="logo-icon"><span>D</span></div>
+      <div class="logo-text">Deep<span class="accent">Tickr</span></div>
+    </div>
+
+    <!-- Badge -->
+    <div class="badge">
+      <div class="badge-dot"></div>
+      Coming Soon
+    </div>
+
+    <!-- Headline -->
+    <h1>Stock analysis,<br><span class="gradient">reimagined by AI.</span></h1>
+
+    <!-- Subtitle -->
+    <p class="subtitle">
+      We're building something new. AI that reads the entire market
+      so you don't have to.
+    </p>
+
+    <!-- Notify form -->
+    <form class="notify-form" onsubmit="handleSubmit(event)">
+      <input type="email" placeholder="Enter your email" required id="emailInput">
+      <button type="submit">Notify Me</button>
+    </form>
+    <p class="hint">Be the first to know when we launch.</p>
+
+    <!-- Divider -->
+    <div class="divider"></div>
+
+    <!-- Features -->
+    <div class="features">
+      <div class="feature"><div class="feature-dot"></div>AI-Powered Verdicts</div>
+      <div class="feature"><div class="feature-dot"></div>Real-Time Signals</div>
+      <div class="feature"><div class="feature-dot"></div>10+ Data Sources</div>
+    </div>
+  </div>
+
+  <div class="footer">&copy; 2026 DeepTickr. All rights reserved.</div>
+
+  <script>
+    function handleSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('emailInput');
+      const btn = e.target.querySelector('button');
+      btn.textContent = 'Added!';
+      btn.style.background = '#065f46';
+      btn.style.color = '#00e5a0';
+      input.value = '';
+      setTimeout(() => {
+        btn.textContent = 'Notify Me';
+        btn.style.background = '#00e5a0';
+        btn.style.color = '#080b10';
+      }, 2500);
+    }
+  </script>
+</body>
+</html>
