@@ -543,15 +543,52 @@
     }
     typeLoop();
 
+    // ── Supabase config ──
+    const SUPABASE_URL = 'https://aoazsoovyqifnrqobnzc.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvYXpzb292eXFpZm5ycW9ibnpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMjQwNzQsImV4cCI6MjA4ODgwMDA3NH0.87_k7KyT-0frDn9u7inoUpuBDoTovpr9WH-pgac5-Q0';
+
     // ── Form submit ──
-    function handleSubmit(e) {
+    async function handleSubmit(e) {
       e.preventDefault();
       const input = document.getElementById('emailInput');
       const btn = e.target.querySelector('button');
-      btn.textContent = 'You\'re in!';
-      btn.style.background = 'linear-gradient(135deg, #065f46, #064e3b)';
-      btn.style.color = '#00e5a0';
-      input.value = '';
+      const email = input.value.trim();
+
+      btn.textContent = 'Saving...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/waitlist`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Prefer': 'return=minimal',
+          },
+          body: JSON.stringify({ email }),
+        });
+
+        if (res.ok || res.status === 201) {
+          btn.textContent = "You're in!";
+          btn.style.background = 'linear-gradient(135deg, #065f46, #064e3b)';
+          btn.style.color = '#00e5a0';
+          input.value = '';
+        } else if (res.status === 409) {
+          btn.textContent = 'Already joined!';
+          btn.style.background = 'linear-gradient(135deg, #065f46, #064e3b)';
+          btn.style.color = '#00e5a0';
+          input.value = '';
+        } else {
+          btn.textContent = 'Error — try again';
+          btn.style.color = '#ff4d6a';
+        }
+      } catch {
+        btn.textContent = 'Error — try again';
+        btn.style.color = '#ff4d6a';
+      }
+
+      btn.disabled = false;
       setTimeout(() => {
         btn.textContent = 'Get Early Access';
         btn.style.background = 'linear-gradient(135deg, #00e5a0, #00c98b)';
